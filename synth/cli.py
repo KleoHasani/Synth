@@ -7,6 +7,7 @@ from threading import Thread
 from queue import Queue
 
 from synth.Server import Server
+from synth.types.Connection import Connection
 
 HOST: str = "localhost"
 PORT: int = 8080
@@ -49,8 +50,6 @@ def animate(msg: str, w_time: int = 60) -> None:
         time.sleep(0.06)
         w_time -= 1
     pass
-
-
 
 
 def start() -> None:
@@ -102,9 +101,15 @@ def start() -> None:
             os.system("clear")
             print_banner()
 
-            server.send_commands(server.clients[client_id])
-
-            os.system("clear")
+            try:
+                client_connection: Connection = server.clients[client_id]
+                server.send_commands(client_connection)
+            except:
+                click.echo(click.style("\nInvalid client ID.", fg="yellow"))
+                time.sleep(1)
+                pass
+            finally:
+                os.system("clear")
             pass
             
         elif option == 0:

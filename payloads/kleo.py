@@ -70,12 +70,24 @@ class Server:
                         for file in file_paths:
                             zip.write(file)
 
-                    with open(zipfile, 'rb') as file:
-                        self.socket.send(file.read(os.stat(zipfile).st_size))
+                    BUFFER_SIZE = 1024
+
+                    # get the file size
+                    filesize = os.path.getsize(os.path.abspath(path_cmd))
+
+                    self.socket.send(f'{filesize}'.encode())
+
+                    with open(zipfile, "rb") as f:
+                        while True:
+                            # read the bytes from the file
+                            bytes_read = f.read(BUFFER_SIZE)
+                            if not bytes_read:
+                                # file transmitting is done
+                                break
+                            self.socket.send(bytes_read)
+                    self.socket.close()
 
                     os.remove(zipfile)
-
-                    self.socket.send(b'File sent.')
 
                 else:
                     msg = f'Command "{cmd}" is not valid.'
